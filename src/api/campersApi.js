@@ -1,16 +1,21 @@
+// api/campers.js
 import axios from "axios";
-const API_BASE_URL = "https://66b1f8e71ca8ad33d4f5f63e.mockapi.io";
 
-const axiosInstance = axios.create({
-  baseURL: API_BASE_URL,
-  timeout: 10000,
-});
+const API_URL = "https://66b1f8e71ca8ad33d4f5f63e.mockapi.io/campers";
 
-export const fetchCampers = (params = {}) => {
-  // Backend filtreleme yapmalı; frontend filtreleri query string'e çevir.
-  return axiosInstance.get("/campers", { params });
-};
+export const getCampers = async (filters = {}) => {
+  const params = new URLSearchParams();
 
-export const fetchCamperById = (id) => {
-  return axiosInstance.get(`/campers/${id}`);
+  if (filters.location) params.append("location", filters.location);
+  if (filters.type) params.append("form", filters.type);
+  if (filters.page) params.append("page", filters.page);
+  if (filters.limit) params.append("limit", filters.limit);
+
+  // Özellikler için (AC, kitchen, etc.)
+  if (filters.AC) params.append("AC", true);
+  if (filters.kitchen) params.append("kitchen", true);
+  // diğer özellikler...
+
+  const response = await axios.get(`${API_URL}?${params}`);
+  return response.data;
 };

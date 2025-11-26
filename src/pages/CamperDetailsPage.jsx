@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { loadCamper } from "../features/campers/campersThunks";
+import { loadCampers } from "../redux/camperThunks.js";
 import ReservationForm from "../components/ReservationForm";
 
 export default function CamperDetail() {
@@ -11,7 +11,7 @@ export default function CamperDetail() {
   const status = useSelector((s) => s.campers.detailStatus);
 
   useEffect(() => {
-    dispatch(loadCamper(id));
+    dispatch(loadCampers(id));
   }, [dispatch, id]);
 
   if (status === "loading") return <div className="p-6">Loading...</div>;

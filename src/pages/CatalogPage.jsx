@@ -1,20 +1,19 @@
 import React, { useEffect } from "react";
-import { loadCampers } from "../features/campers/campersThunks";
+import { loadCampers } from "../redux/camperThunks.js";
 import {
   setLocation,
   setVehicleType,
   toggleFeature,
   setPage,
-} from "../features/filters/filtersSlice";
-import { appendPage, clearList } from "../features/campers/campersSlice";
-import CamperCard from "../components/CamperCard";
+} from "../redux/filtersSlice.js";
+import { appendPage } from "../redux/campersSlice.js";
+import CamperCard from "../components/CamperCard.jsx";
+import { useDispatch, useSelector } from "react-redux";
 
 export default function Catalog() {
   const dispatch = useDispatch();
   const filters = useSelector((s) => s.filters);
-  const campers = useSelector((s) => s.campers.list);
   const status = useSelector((s) => s.campers.status);
-  const page = useSelector((s) => s.campers.page);
 
   useEffect(() => {
     // build params for backend filtering
@@ -34,6 +33,7 @@ export default function Catalog() {
     filters.location,
     filters.vehicleType,
     filters.features,
+    filters.limit,
   ]);
 
   const loadMore = () => {
@@ -89,9 +89,9 @@ export default function Catalog() {
         <section className="flex-1">
           {status === "loading" && <div>Yükleniyor...</div>}
           <div className="grid grid-cols-3 gap-4">
-            {campers.map((c) => (
+            {/* {campers.map((c) => (
               <CamperCard key={c.id} camper={c} />
-            ))}
+            ))} */}
           </div>
 
           <div className="mt-4 text-center">

@@ -2,15 +2,15 @@ import React from "react";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { Provider } from "react-redux";
-import { store } from "./app/store.js";
-import AppRouter from "./routes/AppRouter.jsx";
+import { store } from "./redux/store.js";
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer } from "react-toastify";
+import App from "./App.jsx";
 
 createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <Provider store={store}>
-      <AppRouter />
+      <App />
       <ToastContainer position="top-right" />
     </Provider>
   </React.StrictMode>
