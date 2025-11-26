@@ -1,16 +1,25 @@
-import { BrowserRouter, Route, Routes } from "react-router-dom";
-import HomePage from "./pages/HomePage.jsx";
-import CatalogPage from "./pages/CatalogPage.jsx";
-import CamperDetailsPage from "./pages/CamperDetailsPage.jsx";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-export default function AppRouter() {
+import Layout from "./components/Layout/Layout";
+import Home from "./pages/HomePage/HomePage";
+import Catalog from "./pages/CatalogPage/CatalogPage";
+import CamperDetails from "./pages/CamperDetailsPage/CamperDetailsPage";
+
+function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/catalog" element={<CatalogPage />} />
-        <Route path="/campers/:id" element={<CamperDetailsPage />} />
-      </Routes>
+      <Layout>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/catalog" element={<Catalog />} />
+          <Route path="/catalog/:id" element={<CamperDetails />} />
+        </Routes>
+      </Layout>
+      <ToastContainer position="top-center" autoClose={3000} theme="colored" />
     </BrowserRouter>
   );
 }
+
+export default App;

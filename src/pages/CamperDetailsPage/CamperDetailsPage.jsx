@@ -1,0 +1,247 @@
+import { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  fetchCamperById,
+  clearCurrent,
+  selectCurrentCamper,
+  selectCampersLoading,
+} from "../../redux/campersSlice";
+import Loader from "../../components/Loader/Loader";
+import BookingForm from "../../components/BookingForm/BookingForm";
+import ReviewsList from "../../components/ReviewsList/ReviewsList";
+import Css from "./CamperDetailsPage.module.css";
+
+export default function CamperDetails() {
+  const { id } = useParams();
+  const dispatch = useDispatch();
+
+  const camper = useSelector(selectCurrentCamper);
+  const isLoading = useSelector(selectCampersLoading);
+  const [activeTab, setActiveTab] = useState("features");
+  const [lightboxIndex, setLightboxIndex] = useState(null);
+
+  useEffect(() => {
+    dispatch(fetchCamperById(id));
+
+    return () => {
+      dispatch(clearCurrent());
+    };
+  }, [dispatch, id]);
+
+  if (isLoading && !camper) {
+    return <Loader />;
+  }
+
+  if (!camper && !isLoading) {
+    return <p className={Css.notFound}>Camper not found.</p>;
+  }
+
+  const {
+    name,
+    price,
+    rating,
+    reviews = [],
+    location,
+    gallery,
+    description,
+    adults,
+    engine,
+    transmission,
+    details = {},
+    form,
+    length,
+    width,
+    height,
+    tank,
+    consumption,
+    AC,
+    kitchen,
+    bathroom,
+    TV,
+    radio,
+    refrigerator,
+    microwave,
+    gas,
+    water,
+  } = camper;
+
+  const mainImage =
+    (Array.isArray(gallery) &&
+      gallery.length > 0 &&
+      (gallery[0]?.original || gallery[0]?.thumb)) ||
+    "https://picsum.photos/600/360?campers";
+
+  let galleryImages = [];
+
+  if (Array.isArray(gallery) && gallery.length > 0) {
+    galleryImages = gallery
+      .map((item) => item?.original || item?.thumb)
+      .filter(Boolean);
+  }
+
+  if (!galleryImages.length) {
+    galleryImages = [mainImage];
+  }
+
+  const formattedPrice =
+    typeof price === "number" ? price.toFixed(2) : Number(price).toFixed(2);
+
+  const featureTags = [
+    adults && `${adults} adults`,
+    transmission,
+    engine,
+    (details.AC ?? AC) && "AC",
+    (details.kitchen ?? kitchen) && "Kitchen",
+    (details.bathroom ?? bathroom) && "Bathroom",
+    (details.TV ?? TV) && "TV",
+    (details.radio ?? radio) && "Radio",
+    (details.refrigerator ?? refrigerator) && "Refrigerator",
+    (details.microwave ?? microwave) && "Microwave",
+    (details.gas ?? gas) && "Gas",
+    (details.water ?? water) && "Water",
+  ].filter(Boolean);
+
+  const vehicleDetails = [
+    { label: "Form", value: form },
+    { label: "Length", value: length },
+    { label: "Width", value: width },
+    { label: "Height", value: height },
+    { label: "Tank", value: tank },
+    { label: "Consumption", value: consumption },
+  ].filter((row) => row.value);
+
+  const openLightbox = (index) => {
+    setLightboxIndex(index);
+  };
+
+  const closeLightbox = () => {
+    setLightboxIndex(null);
+  };
+
+  return (
+    <section className={Css.wrap}>
+      {isLoading && <Loader />}
+
+      <h1 className={Css.title}>{name}</h1>
+
+      <div className={Css.metaRow}>
+        <div className={Css.rating}>
+          <span className={Css.star}>★</span>
+          <span>{rating}</span>
+          <button type="button" className={Css.reviewsBtn}>
+            ({reviews.length} reviews)
+          </button>
+        </div>
+
+        <div className={Css.location}>
+          <span className={Css.locationIcon}>📍</span>
+          <span>{location}</span>
+        </div>
+      </div>
+
+      <div className={Css.price}>€ {formattedPrice}</div>
+
+      {/* GALLERY */}
+      <div className={Css.gallery}>
+        {galleryImages.map((src, index) => (
+          <img
+            key={index}
+            src={src}
+            alt={`${name} ${index + 1}`}
+            className={Css.photo}
+            onClick={() => openLightbox(index)}
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = "https://picsum.photos/600/360?campers";
+            }}
+          />
+        ))}
+      </div>
+
+      <div className={Css.layout}>
+        <div className={Css.main}>
+          <p className={Css.description}>{description}</p>
+
+          <div className={Css.tabs}>
+            <button
+              type="button"
+              className={`${Css.tabBtn} ${
+                activeTab === "features" ? Css.tabBtnActive : ""
+              }`}
+              onClick={() => setActiveTab("features")}
+            >
+              Features
+            </button>
+            <button
+              type="button"
+              className={`${Css.tabBtn} ${
+                activeTab === "reviews" ? Css.tabBtnActive : ""
+              }`}
+              onClick={() => setActiveTab("reviews")}
+            >
+              Reviews
+            </button>
+          </div>
+
+          <div className={Css.tabContent}>
+            {activeTab === "features" && (
+              <div className={Css.featuresWrap}>
+                <ul className={Css.featureTags}>
+                  {featureTags.map((tag) => (
+                    <li key={tag} className={Css.tag}>
+                      {tag}
+                    </li>
+                  ))}
+                </ul>
+
+                <div className={Css.detailsBlock}>
+                  <h3 className={Css.detailsTitle}>Vehicle details</h3>
+                  <ul className={Css.detailsList}>
+                    {vehicleDetails.map((row) => (
+                      <li key={row.label} className={Css.detailsRow}>
+                        <span>{row.label}</span>
+                        <span>{row.value}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            )}
+
+            {activeTab === "reviews" && <ReviewsList reviews={reviews} />}
+          </div>
+        </div>
+
+        <aside className={Css.bookingAside}>
+          <BookingForm camperName={name} />
+        </aside>
+      </div>
+
+      {/* Modal */}
+      {lightboxIndex !== null && galleryImages[lightboxIndex] && (
+        <div className={Css.modalBackdrop} onClick={closeLightbox}>
+          <div className={Css.modal} onClick={(e) => e.stopPropagation()}>
+            <button
+              type="button"
+              className={Css.modalClose}
+              onClick={closeLightbox}
+              aria-label="Close image"
+            >
+              ✕
+            </button>
+            <img
+              src={galleryImages[lightboxIndex]}
+              alt={`${name} ${lightboxIndex + 1}`}
+              className={Css.modalImage}
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = "https://picsum.photos/1000/600?campers";
+              }}
+            />
+          </div>
+        </div>
+      )}
+    </section>
+  );
+}

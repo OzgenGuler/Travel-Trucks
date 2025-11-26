@@ -1,33 +1,38 @@
 import { createSlice } from "@reduxjs/toolkit";
 
+const initialState = {
+  location: "",
+  vehicleType: null,
+  equipment: [],
+};
+
 const filtersSlice = createSlice({
   name: "filters",
-  initialState: {
-    location: "",
-    vehicleType: "",
-    features: [],
-    limit: 6,
-    page: 1,
-  },
+  initialState,
   reducers: {
-    setLocation: (state, action) => {
+    setLocation(state, action) {
       state.location = action.payload;
     },
-    setVehicleType: (state, action) => {
+    setVehicleType(state, action) {
       state.vehicleType = action.payload;
     },
-    toggleFeature: (state, action) => {
-      const f = action.payload;
-      if (state.features.includes(f))
-        state.features = state.features.filter((x) => x !== f);
-      else state.features.push(f);
+    toggleEquipment(state, action) {
+      const key = action.payload;
+      if (state.equipment.includes(key)) {
+        state.equipment = state.equipment.filter((item) => item !== key);
+      } else {
+        state.equipment.push(key);
+      }
     },
-    setPage: (state, action) => {
-      state.page = action.payload;
+    resetFilters() {
+      return initialState;
     },
   },
 });
 
-export const { setLocation, setVehicleType, toggleFeature, setPage } =
+export const { setLocation, setVehicleType, toggleEquipment, resetFilters } =
   filtersSlice.actions;
+
+export const selectFilters = (state) => state.filters;
+
 export default filtersSlice.reducer;

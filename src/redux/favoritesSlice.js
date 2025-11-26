@@ -1,50 +1,47 @@
-// redux/favoritesSlice.js
-// import { createSlice } from "@reduxjs/toolkit";
-
-// const loadFavorites = () => {
-//   const saved = localStorage.getItem("favorites");
-//   return saved ? JSON.parse(saved) : [];
-// };
-
-// const favoritesSlice = createSlice({
-//   name: "favorites",
-//   initialState: loadFavorites(),
-//   reducers: {
-//     toggleFavorite: (state, action) => {
-//       const id = action.payload;
-//       const index = state.indexOf(id);
-
-//       if (index > -1) {
-//         state.splice(index, 1);
-//       } else {
-//         state.push(id);
-//       }
-
-//       localStorage.setItem("favorites", JSON.stringify(state));
-//     },
-//   },
-// });
-// export const { toggleFavorite } = favoritesSlice.actions;
-// export default favoritesSlice.reducer;
 import { createSlice } from "@reduxjs/toolkit";
 
-const local = JSON.parse(localStorage.getItem("favorites")) || [];
+const STORAGE_KEY = "travel-trucks-favorites";
+
+const loadFromStorage = () => {
+  try {
+    if (typeof window === "undefined") return [];
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+};
+
+const saveToStorage = (ids) => {
+  try {
+    if (typeof window === "undefined") return;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(ids));
+  } catch {
+    ("");
+  }
+};
+
+const initialState = {
+  ids: loadFromStorage(),
+};
 
 const favoritesSlice = createSlice({
   name: "favorites",
-  initialState: { list: local },
+  initialState,
   reducers: {
-    toggleFavorite: (state, action) => {
-      const id = action.payload;
-      if (state.list.includes(id)) {
-        state.list = state.list.filter((x) => x !== id);
+    toggleFavorite(state, action) {
+      const id = String(action.payload);
+      if (state.ids.includes(id)) {
+        state.ids = state.ids.filter((item) => item !== id);
       } else {
-        state.list.push(id);
+        state.ids.push(id);
       }
-      localStorage.setItem("favorites", JSON.stringify(state.list));
+      saveToStorage(state.ids);
     },
   },
 });
 
 export const { toggleFavorite } = favoritesSlice.actions;
+export const selectFavorites = (state) => state.favorites.ids;
+
 export default favoritesSlice.reducer;
